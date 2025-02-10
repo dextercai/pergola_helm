@@ -1,0 +1,32 @@
+{{ $fullname := printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: {{ $fullname }}
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  selector:
+    matchLabels:
+      app: {{ $fullname }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ $fullname }}
+    spec:
+      {{ if .Values.imagePullSecrets -}}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{ end -}}
+      containers:
+      - name: {{ .Chart.Name }}-main
+        image: dextercai/pergola:{{ .Values.imageVersion }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 6809
+        - containerPort: 6810
+        args:
+        - "/app/pergola"
+
+        

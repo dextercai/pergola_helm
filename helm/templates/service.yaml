@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata: {{ $fullname := printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
+  name: {{ $fullname }}-service
+  labels:
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  ports:
+  - port: 6809
+    targetPort: 6809
+    protocol: TCP
+    name: fsd-service
+  - port: 6810
+    targetPort: 8080
+    protocol: TCP
+    name: fsd-http
+  selector:
+    app: {{ $fullname }}
